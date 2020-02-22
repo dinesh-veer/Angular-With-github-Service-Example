@@ -1,5 +1,6 @@
-# HelloAngular
+# Angular integrates the github service to show the post.
 
+It is integrating the Github serice which gives the posts and after that on list of posts when user click on some post it will render the details of post below the list.
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.1.4.
 
 ## Development server
