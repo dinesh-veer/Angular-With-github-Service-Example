@@ -1,32 +1,29 @@
-import { Component,OnInit } from '@angular/core';
-
-import{AppServiceService} from './app-service.service'
-import { HttpClient } from '@angular/common/http';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
+  standalone: false,
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
-  
-  title = 'Hello-Angula Teests';
-  restItems:any;
-  
-  constructor(private http:HttpClient,private appService:AppServiceService){}
-  ngOnInit(): void {
-    this.getRestItems();
+export class AppComponent {
+  title = 'GitHub Explorer';
+  sidebarOpen = false;
+  showAboutModal = false;
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
   }
-getRestItems():void{
-  this.appService.getAll()
-  .subscribe(
-    restItems=>{
-     this.restItems=restItems;
-     console.log(this.restItems);
-    }
-  )
 
-}
+  closeSidebar(): void {
+    this.sidebarOpen = false;
+  }
 
+  openAbout(): void {
+    this.showAboutModal = true;
+  }
 
+  closeAbout(): void {
+    this.showAboutModal = false;
+  }
 }
