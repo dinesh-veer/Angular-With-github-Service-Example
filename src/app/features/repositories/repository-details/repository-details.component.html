@@ -1,0 +1,357 @@
+<div class="repo-details-container">
+  <div class="breadcrumb">
+    <a routerLink="/repositories" class="back-link">
+      <svg class="icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+        <path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06Z"></path>
+      </svg>
+      Repositories
+    </a>
+    <span class="divider">/</span>
+    <span class="current-repo">{{ owner }} / {{ repoName }}</span>
+  </div>
+
+  <app-loading-spinner *ngIf="isLoading" message="Loading repository details..."></app-loading-spinner>
+  <app-error-banner *ngIf="error" [message]="error" (retry)="loadRepoDetails()"></app-error-banner>
+
+  <div *ngIf="!isLoading && !error && repo" class="repo-content">
+    <!-- Header Card -->
+    <header class="repo-header-card">
+      <div class="header-main">
+        <div class="repo-identity">
+          <img [src]="repo.owner.avatar_url" [alt]="repo.owner.login" class="owner-avatar" />
+          <div class="repo-naming">
+            <h1 class="repo-title">
+              <a [routerLink]="['/users', repo.owner.login]" class="owner-link">{{ repo.owner.login }}</a>
+              <span class="slash">/</span>
+              <span class="repo-name">{{ repo.name }}</span>
+              <span class="visibility-pill">{{ repo.private ? 'Private' : 'Public' }}</span>
+            </h1>
+            <p *ngIf="repo.description" class="repo-desc">{{ repo.description }}</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <a [href]="repo.html_url" target="_blank" rel="noopener noreferrer" class="btn btn-outline" title="Open in GitHub">
+            <svg class="btn-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+            </svg>
+            GitHub
+          </a>
+          <a [href]="repo.html_url" target="_blank" rel="noopener noreferrer" class="btn btn-star">
+            <svg class="btn-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
+            </svg>
+            <span>Star</span>
+            <span class="count-badge">{{ repo.stargazers_count | numberFormat }}</span>
+          </a>
+          <a [href]="repo.html_url + '/fork'" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+            <svg class="btn-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 0-.877-.872.75.75 0 0 0-.623.75v.122H6.25v-.122a.75.75 0 0 0-.623-.75A2.25 2.25 0 1 0 5 5.372ZM11 2.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM4.25 1.75a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5Zm4.5 9.378a2.25 2.25 0 1 0-1.5 0v1.622a.75.75 0 0 0 1.5 0v-1.622Zm-.75 2.872a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"></path>
+            </svg>
+            <span>Fork</span>
+            <span class="count-badge">{{ repo.forks_count | numberFormat }}</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Topics -->
+      <div *ngIf="repo.topics && repo.topics.length > 0" class="topics-row">
+        <span *ngFor="let topic of repo.topics" class="topic-tag">{{ topic }}</span>
+      </div>
+
+      <!-- Quick Metrics Bar -->
+      <div class="metrics-bar">
+        <div class="metric-item">
+          <svg class="metric-icon star-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"></path>
+          </svg>
+          <span class="metric-value">{{ repo.stargazers_count | numberFormat }}</span>
+          <span class="metric-label">stars</span>
+        </div>
+        <div class="metric-item">
+          <svg class="metric-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 0-.877-.872.75.75 0 0 0-.623.75v.122H6.25v-.122a.75.75 0 0 0-.623-.75A2.25 2.25 0 1 0 5 5.372ZM11 2.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM4.25 1.75a.75.75 0 1 1 0 1.5.75.75 0 0 1 0-1.5Zm4.5 9.378a2.25 2.25 0 1 0-1.5 0v1.622a.75.75 0 0 0 1.5 0v-1.622Zm-.75 2.872a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"></path>
+          </svg>
+          <span class="metric-value">{{ repo.forks_count | numberFormat }}</span>
+          <span class="metric-label">forks</span>
+        </div>
+        <div class="metric-item">
+          <svg class="metric-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0ZM8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM5 8a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"></path>
+          </svg>
+          <span class="metric-value">{{ (repo.subscribers_count || repo.watchers_count) | numberFormat }}</span>
+          <span class="metric-label">watchers</span>
+        </div>
+        <div class="metric-item">
+          <svg class="metric-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path>
+            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Z"></path>
+          </svg>
+          <span class="metric-value">{{ repo.open_issues_count | numberFormat }}</span>
+          <span class="metric-label">open issues</span>
+        </div>
+        <div *ngIf="repo.license" class="metric-item">
+          <svg class="metric-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8.75.75V2h.985c.304 0 .565.203.64.497l.588 2.308a.75.75 0 0 1-.365.845l-1.848.972v7.628a.75.75 0 0 1-.75.75h-1a.75.75 0 0 1-.75-.75V6.622L4.398 5.65a.75.75 0 0 1-.365-.845l.588-2.308A.66.66 0 0 1 5.26 2h.99V.75a.75.75 0 0 1 1.5 0v1.25h.5V.75a.75.75 0 0 1 .5 0Z"></path>
+          </svg>
+          <span class="metric-label">License:</span>
+          <span class="metric-value">{{ repo.license.spdx_id || repo.license.name }}</span>
+        </div>
+        <div *ngIf="repo.default_branch" class="metric-item">
+          <svg class="metric-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M11.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm-2.25.75a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25Zm-5.25 9.25a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM4.25 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"></path>
+          </svg>
+          <span class="metric-label">Branch:</span>
+          <span class="metric-value branch-badge">{{ repo.default_branch }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="repo-tabs">
+      <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setTab('overview')">
+        Overview
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'readme'" (click)="setTab('readme')">
+        README
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'commits'" (click)="setTab('commits')">
+        Commits
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'contributors'" (click)="setTab('contributors')">
+        Contributors
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'issues'" (click)="setTab('issues')">
+        Issues
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'languages'" (click)="setTab('languages')">
+        Languages
+      </button>
+    </nav>
+
+    <!-- TAB 1: OVERVIEW -->
+    <div *ngIf="activeTab === 'overview'" class="tab-pane overview-grid">
+      <div class="overview-left">
+        <!-- Readme Preview Box -->
+        <div class="card readme-box">
+          <div class="card-header">
+            <div class="readme-title">
+              <svg class="file-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+              </svg>
+              <span>{{ readme?.name || 'README.md' }}</span>
+            </div>
+            <button class="btn btn-sm btn-ghost" (click)="setTab('readme')">View Full</button>
+          </div>
+          <div class="card-body readme-body">
+            <div *ngIf="readmeContent" class="readme-preview">
+              <pre class="markdown-preview">{{ readmeContent | slice:0:1200 }}{{ readmeContent.length > 1200 ? '...' : '' }}</pre>
+            </div>
+            <div *ngIf="!readmeContent" class="no-readme">
+              No README found for this repository.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="overview-right">
+        <!-- Languages Box -->
+        <div class="card languages-box">
+          <div class="card-header">
+            <h3 class="card-title">Languages</h3>
+          </div>
+          <div class="card-body">
+            <div *ngIf="languages.length > 0">
+              <div class="lang-bar">
+                <span *ngFor="let lang of languages"
+                      [style.width.%]="lang.percentage"
+                      [style.backgroundColor]="lang.color"
+                      [title]="lang.name + ': ' + lang.percentage + '%'"
+                      class="lang-bar-segment"></span>
+              </div>
+              <ul class="lang-list">
+                <li *ngFor="let lang of languages" class="lang-item">
+                  <span class="lang-dot" [style.backgroundColor]="lang.color"></span>
+                  <span class="lang-name">{{ lang.name }}</span>
+                  <span class="lang-percent">{{ lang.percentage }}%</span>
+                </li>
+              </ul>
+            </div>
+            <p *ngIf="languages.length === 0" class="muted-text">No language stats available.</p>
+          </div>
+        </div>
+
+        <!-- Top Contributors Box -->
+        <div class="card contributors-box">
+          <div class="card-header">
+            <h3 class="card-title">Top Contributors</h3>
+            <button class="btn btn-sm btn-ghost" (click)="setTab('contributors')">View all</button>
+          </div>
+          <div class="card-body">
+            <div class="contributors-avatars" *ngIf="contributors.length > 0">
+              <a *ngFor="let c of contributors | slice:0:10"
+                 [routerLink]="['/users', c.login]"
+                 class="contributor-avatar-link"
+                 [title]="c.login + ' (' + c.contributions + ' commits)'">
+                <img [src]="c.avatar_url" [alt]="c.login" class="contributor-avatar" />
+              </a>
+              <span *ngIf="contributors.length > 10" class="more-contributors-pill">
+                +{{ contributors.length - 10 }}
+              </span>
+            </div>
+            <p *ngIf="contributors.length === 0" class="muted-text">No contributors data found.</p>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card links-box">
+          <div class="card-header">
+            <h3 class="card-title">Explore Further</h3>
+          </div>
+          <div class="card-body links-list">
+            <a [routerLink]="['/issues']" [queryParams]="{ repo: owner + '/' + repoName }" class="quick-link-row">
+              <span class="quick-link-text">Explore Issues for this Repository</span>
+              <span class="arrow">&rarr;</span>
+            </a>
+            <a *ngIf="repo.homepage" [href]="repo.homepage" target="_blank" rel="noopener noreferrer" class="quick-link-row">
+              <span class="quick-link-text">Project Homepage</span>
+              <span class="arrow">&nearr;</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: README -->
+    <div *ngIf="activeTab === 'readme'" class="tab-pane">
+      <div class="card full-readme-card">
+        <div class="card-header">
+          <span class="readme-title">{{ readme?.name || 'README.md' }}</span>
+          <a *ngIf="readme?.html_url" [href]="readme?.html_url" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline">
+            View on GitHub
+          </a>
+        </div>
+        <div class="card-body">
+          <pre class="markdown-preview full-readme" *ngIf="readmeContent">{{ readmeContent }}</pre>
+          <p *ngIf="!readmeContent" class="muted-text">No README available.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: COMMITS -->
+    <div *ngIf="activeTab === 'commits'" class="tab-pane">
+      <app-loading-spinner *ngIf="isLoadingTab" message="Loading commits..."></app-loading-spinner>
+      <div *ngIf="!isLoadingTab" class="commits-list card">
+        <div *ngFor="let commit of commits" class="commit-item">
+          <div class="commit-icon">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.75a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path>
+            </svg>
+          </div>
+          <div class="commit-details">
+            <a [href]="commit.html_url" target="_blank" rel="noopener noreferrer" class="commit-message">
+              {{ commit.commit.message.split('\n')[0] }}
+            </a>
+            <div class="commit-meta">
+              <img *ngIf="commit.author?.avatar_url" [src]="commit.author?.avatar_url" class="commit-author-avatar" alt="author" />
+              <span class="commit-author">{{ commit.commit.author.name }}</span>
+              <span class="muted-text">committed {{ commit.commit.author.date | relativeDate }}</span>
+            </div>
+          </div>
+          <a [href]="commit.html_url" target="_blank" rel="noopener noreferrer" class="commit-sha">
+            {{ commit.sha | slice:0:7 }}
+          </a>
+        </div>
+        <app-empty-state *ngIf="commits.length === 0" title="No Commits" message="No recent commits found for this repository."></app-empty-state>
+      </div>
+    </div>
+
+    <!-- TAB 4: CONTRIBUTORS -->
+    <div *ngIf="activeTab === 'contributors'" class="tab-pane">
+      <div class="contributors-grid">
+        <div *ngFor="let c of contributors" class="card contributor-card">
+          <img [src]="c.avatar_url" [alt]="c.login" class="contributor-card-avatar" />
+          <div class="contributor-card-info">
+            <a [routerLink]="['/users', c.login]" class="contributor-name">{{ c.login }}</a>
+            <span class="contributions-count">{{ c.contributions }} contributions</span>
+            <a [href]="c.html_url" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline mt-1">Profile &nearr;</a>
+          </div>
+        </div>
+      </div>
+      <app-empty-state *ngIf="contributors.length === 0" title="No Contributors" message="No contributors data available."></app-empty-state>
+    </div>
+
+    <!-- TAB 5: ISSUES -->
+    <div *ngIf="activeTab === 'issues'" class="tab-pane">
+      <div class="issues-tab-header">
+        <span class="muted-text">Showing recent open issues for {{ owner }}/{{ repoName }}</span>
+        <a [routerLink]="['/issues']" [queryParams]="{ repo: owner + '/' + repoName }" class="btn btn-primary btn-sm">
+          Open in Issues Explorer
+        </a>
+      </div>
+      <app-loading-spinner *ngIf="isLoadingTab" message="Loading issues..."></app-loading-spinner>
+      <div *ngIf="!isLoadingTab" class="issues-list card">
+        <div *ngFor="let issue of issues" class="issue-item">
+          <svg class="issue-icon open" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"></path>
+            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM1.5 8a6.5 6.5 0 1 1 13 0 6.5 6.5 0 0 1-13 0Z"></path>
+          </svg>
+          <div class="issue-main">
+            <div class="issue-title-row">
+              <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer" class="issue-title">
+                {{ issue.title }}
+              </a>
+              <span *ngFor="let label of issue.labels"
+                    class="issue-label-pill"
+                    [style.backgroundColor]="'#' + label.color">
+                {{ label.name }}
+              </span>
+            </div>
+            <div class="issue-meta">
+              #{{ issue.number }} opened {{ issue.created_at | relativeDate }} by
+              <a [routerLink]="['/users', issue.user.login]">{{ issue.user.login }}</a>
+            </div>
+          </div>
+          <div class="issue-comments" *ngIf="issue.comments > 0">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+              <path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0 1 13.25 12H9.06l-2.573 2.573A1.458 1.458 0 0 1 4 13.543V12H2.75A1.75 1.75 0 0 1 1 10.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h4.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+            </svg>
+            <span>{{ issue.comments }}</span>
+          </div>
+        </div>
+        <app-empty-state *ngIf="issues.length === 0" title="No Open Issues" message="There are no open issues found for this repository."></app-empty-state>
+      </div>
+    </div>
+
+    <!-- TAB 6: LANGUAGES -->
+    <div *ngIf="activeTab === 'languages'" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Languages Breakdown</h3>
+        </div>
+        <div class="card-body">
+          <div class="lang-bar large">
+            <span *ngFor="let lang of languages"
+                  [style.width.%]="lang.percentage"
+                  [style.backgroundColor]="lang.color"
+                  [title]="lang.name + ': ' + lang.percentage + '%'"
+                  class="lang-bar-segment"></span>
+          </div>
+          <div class="languages-full-list">
+            <div *ngFor="let lang of languages" class="lang-full-item">
+              <div class="lang-full-left">
+                <span class="lang-dot" [style.backgroundColor]="lang.color"></span>
+                <span class="lang-name font-bold">{{ lang.name }}</span>
+              </div>
+              <div class="lang-full-right">
+                <span class="lang-bytes">{{ lang.bytes | numberFormat }} bytes</span>
+                <span class="lang-percent-badge">{{ lang.percentage }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
